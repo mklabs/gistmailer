@@ -1,7 +1,5 @@
 # gist mailer
 
-job mailer / jenkins mailer / ...
-
 This set of scripts was developped to provide an easy way to post
 process build results for Jenkins or other continuous integration
 system.
@@ -44,7 +42,7 @@ Params:
 The `build.json` file used is following the above structure. The
 relevant build properties used here is `asserts`.
 
-```json
+```js
 [{
   url: "Relevant URL (can be the Job URL)"
   asserts: {
@@ -69,22 +67,200 @@ relevant build properties used here is `asserts`.
 }]
 ```
 
-Values are typically numbers:
+## API
+   - [Git](#git)
+     - [#clone](#git-clone)
+   - [Mailer](#mailer)
+   - [Prop](#prop)
+     - [Basic check](#prop-basic-check)
+     - [Test chain api](#prop-test-chain-api)
+     - [Strategies](#prop-strategies)
+     - [validate](#prop-validate)
 
-```json
-{
-  "asserts": {
-    "rules": {
-      "onDOMReadyTime": 2000,
-      "redirectsTime": 400,
-      "windowOnLoadTime": 3000
-    },
-    "failedCount": 3,
-    "failedAsserts: [
-      "redirectsTime",
-      "onDOMReadyTime",
-      "windowOnLoadTime"
-    ]
-  }
-}
+<a name=""></a>
+
+<a name="git"></a>
+# Git
+#init.
+
+```js
+this.git = new Git();
 ```
+
+#directory.
+
+```js
+this.git = new Git();
+assert.equal(this.git.directory(), path.join('./tmp/templates/default'));
+assert.equal(this.git.directory('foo'), path.join('./tmp/templates/foo'));
+assert.equal(this.git.directory(url), path.join('./tmp/templates/eb28e58ac28a8d3ab845'));
+```
+
+<a name="git-clone"></a>
+## #clone
+Clones url.
+
+```js
+this.git = this.git || new Git();
+this.git.clone(url, done);
+```
+
+and init template.
+
+```js
+fs.stat(this.git.directory(url), done);
+```
+
+<a name="mailer"></a>
+# Mailer
+#init.
+
+```js
+var mailer = new Mailer();
+// Config
+mailer
+  .file(path.join(__dirname, 'fixtures/build.json'))
+  .url(url)
+  .to('foo@bar.com')
+  .service('Gmail')
+  .auth({ name: 'foo', pass: 'bar' });
+assert.deepEqual(mailer.config(), {
+  service: 'Gmail',
+  auth: {
+    name: 'foo',
+    pass: 'bar'
+  }
+});
+```
+
+<a name="prop"></a>
+# Prop
+<a name="prop-basic-check"></a>
+## Basic check
+props well.
+
+```js
+var obj = Object.create({});
+props.forEach(prop(obj));
+props.forEach(assertProp(obj));
+```
+
+<a name="prop-test-chain-api"></a>
+## Test chain api
+Object.create.
+
+```js
+var obj = Object.create({});
+prop(obj)('src');
+prop(obj)('dest');
+prop(obj)('output');
+obj
+  .src('file.json')
+  .dest('tmp/output.json')
+  .output('log/stdout.log')
+assert.equal(obj.src(), 'file.json');
+assert.equal(obj.dest(), 'tmp/output.json');
+assert.equal(obj.output(), 'log/stdout.log');
+```
+
+new Stuff().
+
+```js
+function Stuff() {}
+prop(Stuff.prototype)('src');
+prop(Stuff.prototype)('dest');
+prop(Stuff.prototype)('output');
+var stuff = new Stuff();
+stuff
+  .src('file.json')
+  .dest('tmp/output.json')
+  .output('log/stdout.log')
+assert.equal(stuff.src(), 'file.json');
+assert.equal(stuff.dest(), 'tmp/output.json');
+assert.equal(stuff.output(), 'log/stdout.log');
+```
+
+hash.
+
+```js
+var obj = {};
+prop(obj)('src');
+prop(obj)('dest');
+prop(obj)('output');
+obj
+  .src('file.json')
+  .dest('tmp/output.json')
+  .output('log/stdout.log')
+assert.equal(obj.src(), 'file.json');
+assert.equal(obj.dest(), 'tmp/output.json');
+assert.equal(obj.output(), 'log/stdout.log');
+```
+
+<a name="prop-strategies"></a>
+## Strategies
+_prop - default.
+
+```js
+var obj = {};
+prop(obj)('file');
+obj.file('file.json');
+assert.equal(obj.file(), 'file.json');
+assert.equal(obj._file, 'file.json');
+```
+
+attr - use this.attributes hash.
+
+```js
+var obj = {};
+prop(obj, { strategy: 'attr' })('file');
+obj.file('file.json');
+assert.equal(obj.file(), 'file.json');
+assert.equal(obj.attributes.file, 'file.json');
+obj = {};
+prop(obj, { strategy: prop.attr })('file');
+obj.file('file.json');
+assert.equal(obj.file(), 'file.json');
+assert.equal(obj.attributes.file, 'file.json');
+```
+
+custom.
+
+```js
+// Using this.options object
+function opts(name, value) {
+  this.options = this.options || {};
+  if (!value) return this.options[name];
+  this.options[name] = value;
+  return this;
+}
+var obj = {};
+prop(obj, { strategy: opts })('file');
+obj.file('file.json');
+assert.equal(obj.file(), 'file.json');
+assert.equal(obj.options.file, 'file.json');
+```
+
+<a name="prop-validate"></a>
+## validate
+Validate inputs.
+
+```js
+var obj = {};
+prop(obj, {
+  validate: function (name, value) {
+    if (!value) return;
+    if (!value.name) return;
+    if (!value.pass) return;
+    return true;
+  }
+})('auth');
+obj.auth({ foo: 'bar' });
+assert.ok(typeof obj.auth() === 'undefined');
+obj.auth({
+  name: 'foo',
+  pass: 'bar'
+});
+assert.deepEqual(obj.auth(), { name: 'foo', pass: 'bar' });
+```
+
+
