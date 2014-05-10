@@ -14,9 +14,9 @@ describe('Git', function() {
   it('Git#directory', function() {
     this.git = new Git();
 
-    assert.equal(this.git.directory(), path.join('./tmp/templates/default'));
-    assert.equal(this.git.directory('foo'), path.join('./tmp/templates/foo'));
-    assert.equal(this.git.directory(url), path.join('./tmp/templates/eb28e58ac28a8d3ab845'));
+    assert.equal(this.git.directory(), path.join(__dirname, '.../tmp/templates/default'));
+    assert.equal(this.git.directory('foo'), path.join(__dirname, '../tmp/templates/foo'));
+    assert.equal(this.git.directory(url), path.join(__dirname, '../tmp/templates/eb28e58ac28a8d3ab845'));
   });
 
   describe('Git#clone', function() {

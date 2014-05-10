@@ -13,7 +13,7 @@ describe('Mailer', function() {
     function template (name, data, next) {
       debug('Mock %s name', name);
       debug('Mock data', data);
-      next();
+      next(null, '<h1>Test</h1>', '# Test\n');
     }
 
     return done(null, template);
@@ -28,12 +28,12 @@ describe('Mailer', function() {
       .url(url)
       .to('foo@bar.com')
       .service('Gmail')
-      .auth({ name: 'foo', pass: 'bar' });
+      .auth({ user: 'foo', pass: 'bar' });
 
     assert.deepEqual(mailer.config(), {
       service: 'Gmail',
       auth: {
-        name: 'foo',
+        user: 'foo',
         pass: 'bar'
       }
     });
@@ -47,9 +47,11 @@ describe('Mailer', function() {
     mailer
       .file(path.join(__dirname, 'fixtures/build.json'))
       .url(url)
-      .to(env.MAIL_TO || 'foo')
+      .to(env.MAIL_TO || '')
+      .from(env.MAIL_USER)
+      .subject('test Mailer#run')
       .service('Gmail')
-      .auth({ name: env.MAIL_USER, pass: env.MAIL_PASSWORD })
+      .auth({ user: env.MAIL_USER, pass: env.MAIL_PASSWORD })
       .run(done);
   });
 });

@@ -8,6 +8,8 @@ var events     = require('events');
 var nodemailer = require('nodemailer');
 var prop = require('./lib/prop');
 
+var emailTemplates = require('./lib/email-templates');
+
 module.exports = Mailer;
 Mailer.Git = require('./lib/git');
 
@@ -19,7 +21,6 @@ function Mailer(options) {
 
   this.name = options.name || 'defaults';
   this.git = new Mailer.Git({ name: this.name });
-  this.transport = nodemailer.createTransport('SMTP', this.config());
 }
 
 util.inherits(Mailer, events.EventEmitter);
@@ -30,7 +31,7 @@ props.forEach(prop(Mailer.prototype));
 // Auth requires validation
 var auth = prop(Mailer.prototype, function(auth) {
   if (!auth) return false;
-  if (!auth.name) return false;
+  if (!auth.user) return false;
   if (!auth.pass) return false;
   return true;
 });
@@ -65,7 +66,7 @@ Mailer.prototype.mailOptions = function mailOptions() {
 };
 
 Mailer.prototype.templates = function templates(dir, done) {
-  this._templates = this._templates || require('email-templates');
+  this._templates = this._templates || emailTemplates;
   this._templates(dir, done);
 };
 
@@ -108,13 +109,15 @@ Mailer.prototype.send = function send(done) {
   opts.html = this.html;
   opts.text = this.text;
 
-  debug('Config', this.config());
   debug('Sending email to', opts.to, opts.subject);
+  // console.log(opts);
+  debug('HTML', opts.html);
 
   this.validate();
 
-  var transport = this.transport;
+  var transport = this.transport = nodemailer.createTransport('SMTP', this.config());
   this.transport.sendMail(opts, function(err, res) {
+    transport.close();
     if (err) return done(err);
     debug('Res', res);
     done();
@@ -129,6 +132,6 @@ Mailer.prototype.validate = function validate() {
   if (!this.to()) throw new Error('Missing email destination param');
 
   var auth = this.auth();
-  if (auth && !auth.name) throw new Error('Missing auth name');
+  if (auth && !auth.user) throw new Error('Missing auth username');
   if (auth && !auth.pass) throw new Error('Missing auth password');
 };

@@ -5,17 +5,65 @@ process build results for Jenkins or other continuous integration
 system.
 
 It relies on the excellent
-[node-email-templates](https://github.com/niftylettuce/node-email-templates) to send HTML
-formatted emails.
+[node-email-templates](https://github.com/niftylettuce/node-email-templates) to render HTML
+formatted emails, and [nodemailer](https://github.com/andris9/Nodemailer) for sending.
 
 Templates are fetched from git/gist repository, and are executed in the
 context of the build data passed to downstream Job.
 
+**Note** email-templates is `require`d but not installed by this package.
+If you wish to get full featureset from email-templates, you need the
+package locally by running `npm install email-templates`. The system
+will fallback to [this implementation](./lib/raw-templates). May help on
+systems where installing [juice](https://github.com/LearnBoost/juice) is
+a problem.
+
 ## Usage
+
+Module:
+
+```js
+var Mailer = require('gistmailer');
+var mailer = new Mailer();
+
+mailer
+  .service('Gmail')
+  .auth({ name: 'username@gmail.com', pass: 'password' })
+  .url('https://gist.github.com/mklabs/eb28e58ac28a8d3ab845')
+  .to('example@example.com')
+  .file('./build.json')
+  .run(function(err) {
+    if (!err) return;
+
+    console.error('Error running mailer', err);
+    process.exit(1);
+  });
+```
+
+Command:
+
+```
+
+ Usage: gistmailer [options] <file>
+
+ Options:
+
+   -h, --help            output usage information
+   -V, --version         output the version number
+   -u, --user [user]     SMTP auth user configuration
+   -p, --pass [pass]     SMTP auth password configuration
+   -s, --service [type]  One of the nodemailer service
+   -H, --host [host]     SMTP hostname (not needed with service)
+   -P, --port [port]     SMTP port (not needed with service)
+   -u, --url [url]       Full GIT clone url, or a gist ID
+   -t, --to [to]         Destination email
+
+```
 
 ### Env vars
 
-Use env vars, useful for CI based run.
+Use env vars, useful for CI based run. They'll overwrite any CLI
+arguments / flags.
 
 - `UPSTREAM_DATA` - Absolute path to build data
 - `MAIL_USER` - The email auth credential for username
@@ -26,18 +74,21 @@ Use env vars, useful for CI based run.
 
 See https://github.com/andris9/Nodemailer#setting-up-smtp
 
-## Example
+## Job scripts
 
-    gistmailer build.json https://gist.github.com/eb28e58ac28a8d3ab845.git youremail@yourdomain.com
-    gistmailer build.json eb28e58ac28a8d3ab845 youremail@yourdomain.com
+### Jenkins template
 
-Params:
+`job/jenkins.xml` file is a Jenkins Job template that can be used to quickly
+setup a Job to automatically send mail based on upstream data.
 
-1. build.json - path to build data file
-2. clone url - full GIT clone url, or the gist ID
-3. to - The destination email
+    # Install plugins
+    $ curl -X POST -H 'Content-Type: application/xml' $JEKINS_URL/pluginManager/installNecessaryPlugins --data-binary @config.xml
 
-## Build data
+It has the following job parameters (then available as environment variable to shell
+scripts):
+
+
+### Build data
 
 The `build.json` file used is following the above structure. The
 relevant build properties used here is `asserts`.
@@ -66,6 +117,7 @@ relevant build properties used here is `asserts`.
   }
 }]
 ```
+
 
 ## API
    - [Git](#git)

@@ -1,26 +1,62 @@
 #!/bin/env node
 
-var exists = require('fs').existsSync;
-var Mailer = require('..');
+process.env.DEBUG = process.env.DEBUG || 'gistmailer*';
 
-var args = process.argv.slice(2);
+var Mailer  = require('..');
+var program = require('commander');
+var env     = process.env;
 
-var file = args[0];
-var clone = args[1];
-var to = args[2];
-var name = args[3];
+// CLI
 
-if (!file) throw new Error('Missing file param');
-if (!exists(file)) throw new Error('Cannot load file param: ' + file);
+program
+  .usage('[options] <file>')
+  .version(require('../package.json').version)
+  .option('-u, --user [user]', 'SMTP auth user configuration')
+  .option('-p, --pass [pass]', 'SMTP auth password configuration')
+  .option('-s, --service [type]', 'One of the nodemailer service')
+  .option('-H, --host [host]', 'SMTP hostname (not needed with service)')
+  .option('-P, --port [port]', 'SMTP port (not needed with service)')
+  .option('-u, --url [url]', 'Full GIT clone url, or a gist ID')
+  .option('-t, --to [to]', 'Destination email')
+  .option('-f, --from [from]', 'From email')
+  .parse(process.argv);
 
-if (!clone) throw new Error('Missing clone param');
-if (!to) throw new Error('Missing email destination param');
+// Init
 
-name = name || (clone.match(/\([^\/:]+).git$/) || [])[1];
+var mailer = new Mailer();
+var file = program.args[0];
 
-var mailer = new Mailer({
-  file: file,
-  clone: clone,
-  template: name,
-  to: to
+// Env
+
+if (env.UPSTREAM_DATA) file = env.UPSTREAM_DATA;
+if (env.MAIL_USER) program.user = env.MAIL_USER;
+if (env.MAIL_PASSWORD) program.pass = env.MAIL_PASSWORD;
+if (env.MAIL_SERVICE) program.service = env.MAIL_SERVICE;
+if (env.MAIL_HOST) program.host = env.MAIL_HOST;
+if (env.MAIL_PORT) program.port = env.MAIL_PORT;
+if (env.MAIL_FROM) program.from = env.MAIL_FROM;
+
+if (!file) return program.outputHelp();
+
+// Config
+
+if (program.user && program.pass) mailer.auth({
+  user: program.user,
+  pass: program.pass
+});
+
+mailer.service(program.service);
+mailer.host(program.host);
+mailer.port(program.port);
+mailer.url(program.url);
+mailer.to(program.to);
+mailer.file(file);
+
+// Run
+
+mailer.run(function(err) {
+  if (err) {
+    console.error('Error running mailer', err);
+    return process.exit(1);
+  }
 });
