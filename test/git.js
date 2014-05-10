@@ -7,11 +7,11 @@ describe('Git', function() {
 
   var url = 'https://gist.github.com/eb28e58ac28a8d3ab845.git';
 
-  it('#init', function() {
+  it('Git#init', function() {
     this.git = new Git();
   });
 
-  it('#directory', function() {
+  it('Git#directory', function() {
     this.git = new Git();
 
     assert.equal(this.git.directory(), path.join('./tmp/templates/default'));
@@ -19,7 +19,7 @@ describe('Git', function() {
     assert.equal(this.git.directory(url), path.join('./tmp/templates/eb28e58ac28a8d3ab845'));
   });
 
-  describe('#clone', function() {
+  describe('Git#clone', function() {
 
     it('Clones url', function(done) {
       this.git = this.git || new Git();

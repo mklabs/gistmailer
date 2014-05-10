@@ -54,7 +54,7 @@ describe('Prop', function() {
       assert.equal(stuff.output(), 'log/stdout.log');
     });
 
-    it('hash', function() {
+    it('Hash', function() {
       var obj = {};
       prop(obj)('src');
       prop(obj)('dest');

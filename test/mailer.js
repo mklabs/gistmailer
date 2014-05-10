@@ -19,7 +19,7 @@ describe('Mailer', function() {
     return done(null, template);
   }
 
-  it('#init', function() {
+  it('Mailer#init', function() {
     var mailer = new Mailer();
 
     // Config
@@ -39,7 +39,7 @@ describe('Mailer', function() {
     });
   });
 
-  it('#run', function(done) {
+  it('Mailer#run', function(done) {
     var mailer = new Mailer();
 
     mailer._templates = mockTemplate

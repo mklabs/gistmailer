@@ -69,25 +69,24 @@ relevant build properties used here is `asserts`.
 
 ## API
    - [Git](#git)
-     - [#clone](#git-clone)
+     - [Git#clone](#git-gitclone)
    - [Mailer](#mailer)
    - [Prop](#prop)
      - [Basic check](#prop-basic-check)
      - [Test chain api](#prop-test-chain-api)
      - [Strategies](#prop-strategies)
      - [validate](#prop-validate)
-
 <a name=""></a>
 
 <a name="git"></a>
 # Git
-#init.
+Git#init.
 
 ```js
 this.git = new Git();
 ```
 
-#directory.
+Git#directory.
 
 ```js
 this.git = new Git();
@@ -96,8 +95,8 @@ assert.equal(this.git.directory('foo'), path.join('./tmp/templates/foo'));
 assert.equal(this.git.directory(url), path.join('./tmp/templates/eb28e58ac28a8d3ab845'));
 ```
 
-<a name="git-clone"></a>
-## #clone
+<a name="git-gitclone"></a>
+## Git#clone
 Clones url.
 
 ```js
@@ -113,7 +112,7 @@ fs.stat(this.git.directory(url), done);
 
 <a name="mailer"></a>
 # Mailer
-#init.
+Mailer#init.
 
 ```js
 var mailer = new Mailer();
@@ -180,7 +179,7 @@ assert.equal(stuff.dest(), 'tmp/output.json');
 assert.equal(stuff.output(), 'log/stdout.log');
 ```
 
-hash.
+Hash.
 
 ```js
 var obj = {};
@@ -262,5 +261,4 @@ obj.auth({
 });
 assert.deepEqual(obj.auth(), { name: 'foo', pass: 'bar' });
 ```
-
 
