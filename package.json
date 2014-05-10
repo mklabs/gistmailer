@@ -1,0 +1,20 @@
+{
+  "name": "gistmailer",
+  "version": "0.0.0",
+  "description": "job mailer / jenkins mailer / ...",
+  "main": "index.js",
+  "bin": "bin/gistmailer",
+  "dependencies": {
+    "nodemailer": "~0.6.3",
+    "debug": "^0.8.1"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2"
+  },
+  "scripts": {
+    "pretest": "rm -rf ./tmp/templates/*",
+    "test": "mocha --reporter spec test --timeout 10000"
+  },
+  "author": "",
+  "license": "ISC"
+}

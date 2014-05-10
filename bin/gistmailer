@@ -1,0 +1,26 @@
+#!/bin/env node
+
+var exists = require('fs').existsSync;
+var Mailer = require('..');
+
+var args = process.argv.slice(2);
+
+var file = args[0];
+var clone = args[1];
+var to = args[2];
+var name = args[3];
+
+if (!file) throw new Error('Missing file param');
+if (!exists(file)) throw new Error('Cannot load file param: ' + file);
+
+if (!clone) throw new Error('Missing clone param');
+if (!to) throw new Error('Missing email destination param');
+
+name = name || (clone.match(/\([^\/:]+).git$/) || [])[1];
+
+var mailer = new Mailer({
+  file: file,
+  clone: clone,
+  template: name,
+  to: to
+});
