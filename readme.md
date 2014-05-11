@@ -336,4 +336,8 @@ assert.deepEqual(obj.auth(), { name: 'foo', pass: 'bar' });
 
 ---
 
+#### TODOs
+
+- [] rename into notif-mailer, build notif module
+
 ...
