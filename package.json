@@ -16,8 +16,8 @@
   "scripts": {
     "pretest": "rm -rf ./tmp/templates/*",
     "test": "mocha --reporter spec --timeout 10000 ./test/*.js",
-    "send": "./scripts/send.sh",
-    "assert": "./scripts/assert.js"
+    "send": "sh scripts/send.sh",
+    "assert": "node scripts/assert.js"
   },
   "license": "ISC"
 }
