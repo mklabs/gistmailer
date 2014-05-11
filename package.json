@@ -1,6 +1,6 @@
 {
   "name": "gistmailer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "job mailer / jenkins mailer / ...",
   "main": "index.js",
   "bin": "bin/gistmailer",
