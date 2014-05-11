@@ -19,6 +19,7 @@ program
   .option('-u, --url [url]', 'Full GIT clone url, or a gist ID')
   .option('-t, --to [to]', 'Destination email')
   .option('-f, --from [from]', 'From email')
+  .option('-S, --subject [subject]', 'Content of email subject')
   .parse(process.argv);
 
 // Init
@@ -35,6 +36,7 @@ if (env.MAIL_SERVICE) program.service = env.MAIL_SERVICE;
 if (env.MAIL_HOST) program.host = env.MAIL_HOST;
 if (env.MAIL_PORT) program.port = env.MAIL_PORT;
 if (env.MAIL_FROM) program.from = env.MAIL_FROM;
+if (env.MAIL_SUBJECT) program.subject = env.MAIL_SUBJECT;
 
 if (!file) return program.outputHelp();
 
@@ -50,6 +52,7 @@ mailer.host(program.host);
 mailer.port(program.port);
 mailer.url(program.url);
 mailer.to(program.to);
+mailer.subject(program.subject);
 mailer.file(file);
 
 // Run

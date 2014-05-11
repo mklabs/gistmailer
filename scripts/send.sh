@@ -1,13 +1,13 @@
 #!/bin/bash
 
-
 MAILS="$JOB_MAILS"
-PATH=./node_modules/.bin:./bin:$PATH
 
 echo "Sending emails to $MAILS"
+
+gistmailer=$PWD/bin/gistmailer
 
 for mail in $MAILS; do
   echo "Sending email to $mail"
 
-  gistmailer
+  MAIL_TO=$mail npm run assert
 done

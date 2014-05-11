@@ -14,7 +14,7 @@ module.exports = Mailer;
 Mailer.Git = require('./lib/git');
 
 // List of attribute accessors
-var props = ['service', 'url', 'file', 'to', 'host', 'port', 'subject', 'from', 'to']
+var props = ['service', 'url', 'file', 'to', 'host', 'port', 'subject', 'from', 'to', 'data']
 
 function Mailer(options) {
   options = options || {};
@@ -39,6 +39,14 @@ var auth = prop(Mailer.prototype, function(auth) {
 // Make prop
 auth('auth');
 
+// File, kind of special accesor, also updated data hash
+Mailer.prototype.file = function file(value) {
+  if (!value) return this._file;
+  this._file = path.resolve(value);
+  if (exists(this._file)) this.data(require(this._file));
+  return this;
+};
+
 // SMTP config
 Mailer.prototype.config = function config() {
   var conf = {};
@@ -48,7 +56,6 @@ Mailer.prototype.config = function config() {
   if (this.host()) conf.host = this.host();
   if (this.port()) conf.host = this.port();
 
-  debug('SMTP config', conf);
   return conf;
 };
 
@@ -62,7 +69,6 @@ Mailer.prototype.mailOptions = function mailOptions() {
 
   debug('Mail options', conf);
   return conf;
-
 };
 
 Mailer.prototype.templates = function templates(dir, done) {
@@ -92,7 +98,7 @@ Mailer.prototype.render = function render(template, done) {
   if (!template) return done(new Error('Missing template'));
 
   var me = this;
-  template(this.name, this.data || {}, function(err, html, text) {
+  template(this.name, this.data(), function(err, html, text) {
     if (err) return done(err);
     me.html = html;
     me.text = text;
@@ -125,8 +131,12 @@ Mailer.prototype.send = function send(done) {
 };
 
 Mailer.prototype.validate = function validate() {
-  if (!this.file()) throw new Error('Missing file param');
-  if (!exists(this.file())) throw new Error('Cannot load file param: ' + this.file());
+  var data = this.data();
+
+  if (!data) {
+    if (!this.file()) throw new Error('Missing file param');
+    if (!exists(this.file())) throw new Error('Cannot load file param: ' + this.file());
+  }
 
   if (!this.url()) throw new Error('Missing clone URL param');
   if (!this.to()) throw new Error('Missing email destination param');

@@ -14,7 +14,7 @@ context of the build data passed to downstream Job.
 **Note** email-templates is `require`d but not installed by this package.
 If you wish to get full featureset from email-templates, you need the
 package locally by running `npm install email-templates`. The system
-will fallback to [this implementation](./lib/raw-templates). May help on
+will fallback to [this implementation](./lib/raw-templates.js). May help on
 systems where installing [juice](https://github.com/LearnBoost/juice) is
 a problem.
 
@@ -60,6 +60,18 @@ Command:
 
 ```
 
+Scripts
+
+```
+
+# Iterates over JOB_MAILS
+$ npm run gistmailer send
+
+# Send email based on environment variables
+$ MAIL_TO=example@example.com npm run gistmailer asserts
+
+```
+
 ### Env vars
 
 Use env vars, useful for CI based run. They'll overwrite any CLI
@@ -81,12 +93,20 @@ See https://github.com/andris9/Nodemailer#setting-up-smtp
 `job/jenkins.xml` file is a Jenkins Job template that can be used to quickly
 setup a Job to automatically send mail based on upstream data.
 
-    # Install plugins
-    $ curl -X POST -H 'Content-Type: application/xml' $JEKINS_URL/pluginManager/installNecessaryPlugins --data-binary @config.xml
+    # Install plugins. Change name=mailer to change the job name
+    $ curl -X POST -H 'Content-Type: application/xml' $JEKINS_URL/createItem?name=mailer --data-binary @scripts/jenkins.xml
 
 It has the following job parameters (then available as environment variable to shell
 scripts):
 
+- `JOB_MAILS` - List of destination emails for any failed asserts, space separated.
+- `MAIL_SERVICE` - https://github.com/andris9/Nodemailer#well-known-services-for-smtp
+- `MAIL_USER` - SMTP auth user
+- `MAIL_PASSWORD` - SMTP auth password
+- `MAIL_SUBJECT` - Email subject
+- `UPSTREAM_DATA` - Just for test the default value. Passed from upstream. Absolute path to the build data (including `asserts`)
+- `TEMPLATE_URL` - Full Git clone URL, or a gist id (Default: [eb28e58ac28a8d3ab845](https://gist.github.com/mklabs/eb28e58ac28a8d3ab845))
+- `DEBUG` - [Debug](https://github.com/visionmedia/debug#debug) lvl option
 
 ### Build data
 
@@ -314,3 +334,6 @@ obj.auth({
 assert.deepEqual(obj.auth(), { name: 'foo', pass: 'bar' });
 ```
 
+---
+
+...
