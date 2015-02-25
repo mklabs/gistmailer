@@ -58,6 +58,7 @@ mailer.host(program.host);
 mailer.port(program.port);
 mailer.url(program.url);
 mailer.to(program.to);
+mailer.from(program.from);
 mailer.url(program.url);
 mailer.subject(program.subject);
 
